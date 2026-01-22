@@ -1,0 +1,172 @@
+# Flag when Anthropic-owned content is modified on main
+name: Anthropic Skill Guard
+
+on:
+  push:
+    branches: [main]
+    paths:
+      # Document skills (Anthropic-owned)
+      - 'skills/xlsx/**'
+      - 'skills/docx/**'
+      - 'skills/pptx/**'
+      - 'skills/pdf/**'
+      # Example skills (Anthropic-owned)
+      - 'skills/algorithmic-art/**'
+      - 'skills/brand-guidelines/**'
+      - 'skills/canvas-design/**'
+      - 'skills/doc-coauthoring/**'
+      - 'skills/frontend-design/**'
+      - 'skills/internal-comms/**'
+      - 'skills/mcp-builder/**'
+      - 'skills/skill-creator/**'
+      - 'skills/slack-gif-creator/**'
+      - 'skills/theme-factory/**'
+      - 'skills/web-artifacts-builder/**'
+      - 'skills/webapp-testing/**'
+      # Spec and template (Anthropic-owned)
+      - 'spec/**'
+      - 'template/**'
+
+permissions:
+  contents: write
+  pull-requests: write
+
+jobs:
+  flag-anthropic-changes:
+    name: Flag Anthropic content modification
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
+
+      - name: Identify modified Anthropic files
+        id: detect
+        run: |
+          # Define Anthropic-owned paths
+          ANTHROPIC_PATHS=(
+            "skills/xlsx"
+            "skills/docx"
+            "skills/pptx"
+            "skills/pdf"
+            "skills/algorithmic-art"
+            "skills/brand-guidelines"
+            "skills/canvas-design"
+            "skills/doc-coauthoring"
+            "skills/frontend-design"
+            "skills/internal-comms"
+            "skills/mcp-builder"
+            "skills/skill-creator"
+            "skills/slack-gif-creator"
+            "skills/theme-factory"
+            "skills/web-artifacts-builder"
+            "skills/webapp-testing"
+            "spec"
+            "template"
+          )
+
+          # Get changed files in this push
+          CHANGED_FILES=$(git diff --name-only HEAD~1 HEAD 2>/dev/null || git diff --name-only HEAD)
+
+          echo "Changed files:"
+          echo "$CHANGED_FILES"
+
+          # Find which Anthropic paths were modified
+          MODIFIED_SKILLS=""
+          MODIFIED_FILES=""
+
+          for path in "${ANTHROPIC_PATHS[@]}"; do
+            MATCHES=$(echo "$CHANGED_FILES" | grep "^${path}/" || true)
+            if [[ -n "$MATCHES" ]]; then
+              SKILL_NAME=$(basename "$path")
+              if [[ -z "$MODIFIED_SKILLS" ]]; then
+                MODIFIED_SKILLS="$SKILL_NAME"
+              else
+                MODIFIED_SKILLS="$MODIFIED_SKILLS, $SKILL_NAME"
+              fi
+              MODIFIED_FILES="$MODIFIED_FILES"$'\n'"$MATCHES"
+            fi
+          done
+
+          # Trim leading newline
+          MODIFIED_FILES=$(echo "$MODIFIED_FILES" | sed '/^$/d')
+
+          if [[ -n "$MODIFIED_SKILLS" ]]; then
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
+            echo "modified_skills=$MODIFIED_SKILLS" >> "$GITHUB_OUTPUT"
+            {
+              echo "modified_files<<EOF"
+              echo "$MODIFIED_FILES"
+              echo "EOF"
+            } >> "$GITHUB_OUTPUT"
+            echo "::warning::Anthropic-owned content modified: $MODIFIED_SKILLS"
+          else
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
+            echo "No Anthropic-owned content was modified."
+          fi
+
+      - name: Create review branch and PR
+        if: steps.detect.outputs.has_changes == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          MODIFIED_SKILLS: ${{ steps.detect.outputs.modified_skills }}
+          MODIFIED_FILES: ${{ steps.detect.outputs.modified_files }}
+        run: |
+          # Configure git
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+          # Generate branch name with timestamp
+          BRANCH_NAME="review/anthropic-skill-modified-$(date +%Y%m%d-%H%M%S)"
+          COMMIT_SHA="${{ github.sha }}"
+          SHORT_SHA="${COMMIT_SHA:0:7}"
+
+          # Create the review branch from current HEAD
+          git checkout -b "$BRANCH_NAME"
+
+          # Push the branch
+          git push origin "$BRANCH_NAME"
+
+          # Create PR body using heredoc
+          PR_BODY=$(cat <<EOF
+          ## :warning: Anthropic Example Skill Modified
+
+          This PR was automatically created because Anthropic-owned content was modified in commit ${{ github.sha }}.
+
+          ### Modified Skills/Paths
+          **${MODIFIED_SKILLS}**
+
+          ### Changed Files
+          \`\`\`
+          ${MODIFIED_FILES}
+          \`\`\`
+
+          ### Why This PR Exists
+          This repository is a fork of [anthropics/skills](https://github.com/anthropics/skills). The paths above contain original Anthropic content that should generally not be modified to maintain compatibility with upstream.
+
+          ### Actions Required
+          1. **Review** the changes to confirm they are intentional
+          2. **If intentional**: Document why the modification was necessary, then close this PR
+          3. **If unintentional**: Revert the changes on \`main\` branch
+
+          ### Commit Details
+          - **Commit**: ${{ github.sha }}
+          - **Author**: ${{ github.actor }}
+          - **Message**: ${{ github.event.head_commit.message }}
+
+          ---
+          *This PR was created by the Anthropic Skill Guard workflow.*
+          EOF
+          )
+
+          # Create the PR
+          gh pr create \
+            --base main \
+            --head "$BRANCH_NAME" \
+            --title ":warning: ANTHROPIC SKILL MODIFIED - ${MODIFIED_SKILLS}" \
+            --body "$PR_BODY"
+
+          echo "Review PR created for modified Anthropic content: ${MODIFIED_SKILLS}"
