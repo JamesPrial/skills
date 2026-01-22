@@ -40,6 +40,15 @@
         "./skills/web-artifacts-builder",
         "./skills/webapp-testing"
       ]
+    },
+    {
+      "name": "personal-skills",
+      "description": "Personal workflow skills for dotfiles management and development automation",
+      "source": "./",
+      "strict": false,
+      "skills": [
+        "./skills/dotfiles-development"
+      ]
     }
   ]
 }
