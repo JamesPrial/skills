@@ -55,6 +55,7 @@ main() {
     "${SCRIPT_DIR}/test_add_config.sh"
     "${SCRIPT_DIR}/test_agent_git.sh"
     "${SCRIPT_DIR}/test_agent_script.sh"
+    "${SCRIPT_DIR}/test_agent_tdd.sh"
     "${SCRIPT_DIR}/test_symlink.sh"
     "${SCRIPT_DIR}/test_permissions.sh"
   )

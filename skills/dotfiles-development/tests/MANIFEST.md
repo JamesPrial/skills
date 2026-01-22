@@ -133,6 +133,23 @@ Complete test suite for the dotfiles-development Claude Code skill, created at `
 
 ---
 
+#### 8. `test_agent_tdd.sh` (700 bytes, chmod 700)
+**Test Name**: Agent Selection - TDD Workflow
+
+**Tests**: Correct agent recommendation for TDD with bash scripts
+
+**Prompt**: "I need to create a new bash script for this repo. What agents should I use?"
+
+**Expected Pattern**: `bash-tdd-architect`
+
+**What It Validates**:
+- Skill correctly identifies that script creation requires TDD approach
+- Users are directed to use bash-tdd-architect alongside bash-script-architect
+- Parallel agent execution pattern is communicated
+- TDD workflow is recommended for new scripts
+
+---
+
 ### Documentation Files
 
 #### 8. `README.md`
@@ -177,6 +194,7 @@ Complete test suite for the dotfiles-development Claude Code skill, created at `
 ├── test_add_config.sh           # Test: Adding configs
 ├── test_agent_git.sh            # Test: Git agent selection
 ├── test_agent_script.sh         # Test: Script agent selection
+├── test_agent_tdd.sh            # Test: TDD workflow agent selection
 ├── test_symlink.sh              # Test: Symlink architecture
 └── test_permissions.sh          # Test: Permission model
 ```
@@ -203,12 +221,13 @@ cd /Users/jamesprial/code/dotfiles/.claude/skills/dotfiles-development/tests
 | test_add_config.sh | 934 B | Script | Test case |
 | test_agent_git.sh | 829 B | Script | Test case |
 | test_agent_script.sh | 901 B | Script | Test case |
+| test_agent_tdd.sh | ~700 B | Script | Test case |
 | test_symlink.sh | 994 B | Script | Test case |
 | test_permissions.sh | 832 B | Script | Test case |
 | README.md | ~5 KB | Docs | Full documentation |
 | MANIFEST.md | ~3 KB | Docs | This inventory |
 
-**Total**: 8 executable scripts + 2 documentation files = 10 files
+**Total**: 9 executable scripts + 2 documentation files = 11 files
 
 ## Permissions Model
 

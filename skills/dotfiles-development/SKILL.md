@@ -30,7 +30,7 @@ digraph agent_selection {
 
     "git-ops (Haiku)" [shape=box];
     "gh-cli-expert (Sonnet)" [shape=box];
-    "bash-script-architect (Haiku)" [shape=box];
+    "bash-script-architect + bash-tdd-architect (parallel)" [shape=box];
     "devops-infra-lead (Sonnet)" [shape=box];
     "No agent needed" [shape=box];
 
@@ -39,7 +39,7 @@ digraph agent_selection {
     "Git operation?" -> "GitHub/Actions?" [label="no"];
     "GitHub/Actions?" -> "gh-cli-expert (Sonnet)" [label="yes"];
     "GitHub/Actions?" -> "Writing script?" [label="no"];
-    "Writing script?" -> "bash-script-architect (Haiku)" [label="yes"];
+    "Writing script?" -> "bash-script-architect + bash-tdd-architect (parallel)" [label="yes"];
     "Writing script?" -> "devops-infra-lead (Sonnet)" [label="infra/CI work"];
     "Writing script?" -> "No agent needed" [label="config edit"];
 }
@@ -49,10 +49,13 @@ digraph agent_selection {
 |-------|-------|---------|
 | `git-ops` | Haiku | **All git operations** - commits, branches, status. Isolates git context from main conversation. |
 | `bash-script-architect` | Haiku | Writing/debugging bash scripts |
+| `bash-tdd-architect` | inherit | TDD for bash scripts - runs **IN PARALLEL** with `bash-script-architect` |
 | `gh-cli-expert` | Sonnet | GitHub Actions failures, PR management, gh CLI |
 | `devops-infra-lead` | Sonnet | Infrastructure, CI/CD, system admin |
 
 **Important:** For committing changes, use the `git-ops` agent (not generic skills). It keeps git output isolated from the main context window.
+
+**TDD for Scripts:** When writing or modifying bash scripts, launch `bash-tdd-architect` **IN PARALLEL** with `bash-script-architect`. The TDD agent designs behavior-driven tests BEFORE seeing implementation, ensuring true test-first development.
 
 ## Wrapper Scripts (bin/claude/)
 
