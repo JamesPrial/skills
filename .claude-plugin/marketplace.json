@@ -1,8 +1,8 @@
 {
-  "name": "anthropic-agent-skills",
+  "name": "skills-by-james",
   "owner": {
-    "name": "Keith Lazuka",
-    "email": "klazuka@anthropic.com"
+    "name": "James Prial",
+    "email": "prialjames17@gmail.com"
   },
   "metadata": {
     "description": "Anthropic example skills",
