@@ -1,0 +1,37 @@
+# Run dotfiles-development skill tests on push/PR to main
+name: Tests
+
+on:
+  push:
+    branches: [main]
+    paths:
+      - 'skills/dotfiles-development/**'
+      - '.github/workflows/test.yml'
+  pull_request:
+    branches: [main]
+    paths:
+      - 'skills/dotfiles-development/**'
+      - '.github/workflows/test.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  test-dotfiles-skill:
+    name: Run dotfiles-development tests
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Make test scripts executable
+        run: chmod +x ./skills/dotfiles-development/tests/*.sh
+
+      - name: Run test suite
+        run: ./skills/dotfiles-development/tests/run_tests.sh
