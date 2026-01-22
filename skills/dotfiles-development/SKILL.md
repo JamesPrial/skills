@@ -8,15 +8,16 @@ description: Use when working in this dotfiles repository - modifying shell conf
 ## Symlink Architecture
 
 ```
-~/.dotfiles -> <repo>/.dotfiles     # Primary anchor
+~/.dotfiles -> <repo>               # Primary anchor (points to repo root)
 ~/.zshrc                            # Bootstrap file (sources ~/.dotfiles/zshrc)
 ~/.ssh/config -> ~/.dotfiles/ssh/config
 ~/.config/nvim -> ~/.dotfiles/nvim
+~/.claudescripts -> ~/.dotfiles/claudescripts
 ```
 
 All paths resolve through `~/.dotfiles`. Scripts find the repo via:
 ```bash
-DOTFILES_DIR="$(dirname "$(readlink -f "$HOME/.dotfiles")")"
+DOTFILES_DIR="$(readlink -f "$HOME/.dotfiles")"
 ```
 
 ## Agent Selection
@@ -57,7 +58,7 @@ digraph agent_selection {
 
 **TDD for Scripts:** When writing or modifying bash scripts, launch `bash-tdd-architect` **IN PARALLEL** with `bash-script-architect`. The TDD agent designs behavior-driven tests BEFORE seeing implementation, ensuring true test-first development.
 
-## Wrapper Scripts (bin/claude/)
+## Wrapper Scripts (claudescripts/)
 
 | Script | Model | Purpose |
 |--------|-------|---------|
@@ -65,30 +66,32 @@ digraph agent_selection {
 | `ghcli` | Sonnet | GitHub CLI operations |
 | `support` | Opus | Bash debugging with web search |
 
+Accessed via `~/.claudescripts` symlink (in PATH).
+
 ## Adding New Configurations
 
-1. **Add file** to `.dotfiles/` (no dot prefix in name)
-2. **Add chmod** line to `fix-perms.sh`:
+1. **Add file** to repo root (no dot prefix in name)
+2. **Add chmod** line to `bin/dotfiles-fix-perms`:
    - Scripts/dirs: `chmod 700`
    - Config files: `chmod 600`
-3. **Add symlink** (if needed) to `setup_symlinks()` in `install.sh`
+3. **Add symlink** (if needed) to `setup_symlinks()` in `bin/dotfiles-install`
 
 ## Permission Model
 
 | Type | Permission | Example |
 |------|------------|---------|
-| Directories | 700 | `.dotfiles/nvim/` |
-| Scripts | 700 | `install.sh`, `sync.sh` |
+| Directories | 700 | `nvim/`, `bin/` |
+| Scripts | 700 | `bin/dotfiles-install`, `bin/dotfiles-sync` |
 | Config files | 600 | `zshrc`, `ssh/config` |
 
-Git hooks auto-fix permissions on pulls via `fix-perms.sh`.
+Git hooks auto-fix permissions on pulls via `bin/dotfiles-fix-perms`.
 
 ## Testing Changes
 
 ```bash
-source ~/.zshrc          # Reload shell config
-./install.sh             # Safe to re-run (idempotent)
-ls -la                   # Verify permissions
+source ~/.zshrc                      # Reload shell config
+./bin/dotfiles-install               # Safe to re-run (idempotent)
+ls -la                               # Verify permissions
 ```
 
 ## Common Mistakes
@@ -96,14 +99,15 @@ ls -la                   # Verify permissions
 | Mistake | Fix |
 |---------|-----|
 | Adding dot prefix to files | Use `zshrc` not `.zshrc` - symlinks add the dot |
-| Forgetting fix-perms.sh | Every new file needs a chmod line |
+| Forgetting fix-perms | Every new file needs a chmod line in `bin/dotfiles-fix-perms` |
 | Wrong permission value | Scripts=700, configs=600 |
-| Editing ~/.zshrc directly | Edit `.dotfiles/zshrc` - bootstrap file just sources it |
+| Editing ~/.zshrc directly | Edit `zshrc` at repo root - bootstrap file just sources it |
 | Hardcoding paths | Use `$HOME/.dotfiles` or resolve via symlink |
 
 ## Key Files
 
-- `.dotfiles/install.sh` - Bootstrap, symlinks, dependencies
-- `.dotfiles/fix-perms.sh` - Permission management
-- `.dotfiles/sync.sh` - Pull and fix permissions
-- `.dotfiles/CLAUDE.md` - Additional dev guidance
+- `bin/dotfiles-install` - Bootstrap, symlinks, dependencies
+- `bin/dotfiles-fix-perms` - Permission management
+- `bin/dotfiles-sync` - Pull and fix permissions
+- `CLAUDE.md` - Repository overview
+- `bin/CLAUDE.md` - Scripts documentation
