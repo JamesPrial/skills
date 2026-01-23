@@ -43,11 +43,18 @@
     },
     {
       "name": "personal-skills",
-      "description": "Personal workflow skills for dotfiles management and development automation",
+      "description": "Personal workflow skills and agents for dotfiles management, development automation, bash scripting, DevOps, and Git operations",
       "source": "./",
       "strict": false,
       "skills": [
         "./skills/dotfiles-development"
+      ],
+      "agents": [
+        "./agents/bash-script-architect",
+        "./agents/bash-tdd-architect",
+        "./agents/devops-infra-lead",
+        "./agents/gh-cli-expert",
+        "./agents/git-ops"
       ]
     }
   ]
