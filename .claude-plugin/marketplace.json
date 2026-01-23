@@ -47,14 +47,15 @@
       "source": "./",
       "strict": false,
       "skills": [
-        "./skills/dotfiles-development"
+        "./skills/dotfiles-development",
+        "./skills/ccru-precursor"
       ],
       "agents": [
-        "./agents/bash-script-architect",
-        "./agents/bash-tdd-architect",
-        "./agents/devops-infra-lead",
-        "./agents/gh-cli-expert",
-        "./agents/git-ops"
+        "./skills/dotfiles-development/agents/bash-script-architect",
+        "./skills/dotfiles-development/agents/bash-tdd-architect",
+        "./skills/dotfiles-development/agents/devops-infra-lead",
+        "./skills/dotfiles-development/agents/gh-cli-expert",
+        "./skills/dotfiles-development/agents/git-ops"
       ]
     }
   ]
