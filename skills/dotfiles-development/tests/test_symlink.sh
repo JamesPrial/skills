@@ -21,7 +21,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/helpers.sh"
 
 # The test prompt
-readonly TEST_PROMPT="Where is the actual zshrc file I should edit in this dotfiles repo?"
+readonly TEST_PROMPT="Use the dotfiles-development skill. Where is the actual zshrc file I should edit?"
 
 # The pattern we expect to find in the skill's response
 # Escape the dot to match it literally

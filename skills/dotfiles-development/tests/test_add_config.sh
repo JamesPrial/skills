@@ -22,7 +22,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/helpers.sh"
 
 # The test prompt
-readonly TEST_PROMPT="How would I add a new tmux config to this dotfiles repo? Just give me the steps."
+readonly TEST_PROMPT="Use the dotfiles-development skill. How would I add a new tmux config? Just give me the steps."
 
 # Multiple acceptable patterns (passes if ANY match)
 readonly EXPECTED_PATTERNS=(

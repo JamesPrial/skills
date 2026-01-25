@@ -20,7 +20,7 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 source "${SCRIPT_DIR}/helpers.sh"
 
 # The test prompt
-readonly TEST_PROMPT="I need to create a new bash script for this repo. What agents should I use?"
+readonly TEST_PROMPT="Use the dotfiles-development skill. I need to create a new bash script with tests. What agents should I use?"
 
 # The pattern we expect to find in the skill's response
 readonly EXPECTED_PATTERN="bash-tdd-architect"
