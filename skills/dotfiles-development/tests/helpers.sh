@@ -6,14 +6,30 @@ IFS=$'\n\t'
 # Helper functions for dotfiles skill tests
 #######################################
 
-# Detect timeout command (GNU timeout on Linux, gtimeout on macOS with coreutils)
-if command -v timeout &>/dev/null; then
-  TIMEOUT_CMD="timeout 60"
-elif command -v gtimeout &>/dev/null; then
-  TIMEOUT_CMD="gtimeout 60"
-else
-  TIMEOUT_CMD=""  # No timeout available, run without
-fi
+#######################################
+# Run a command with timeout (cross-platform)
+# Falls back to running without timeout if unavailable.
+#
+# Args:
+#   $1 - timeout in seconds
+#   $@ - command and arguments to run
+#
+# Returns:
+#   Exit code from the command (or 124 on timeout)
+#######################################
+run_with_timeout() {
+  local timeout_secs="$1"
+  shift
+
+  if command -v timeout &>/dev/null; then
+    timeout "$timeout_secs" "$@"
+  elif command -v gtimeout &>/dev/null; then
+    gtimeout "$timeout_secs" "$@"
+  else
+    # No timeout available, run without
+    "$@"
+  fi
+}
 
 # Color codes for output
 readonly COLOR_GREEN='\033[0;32m'
@@ -75,7 +91,7 @@ run_test() {
 
   local green_output
   green_output=$(
-    $TIMEOUT_CMD claude --model haiku \
+    run_with_timeout 60 claude --model haiku \
       --print \
       --allowedTools "Read,Glob,Grep,Skill" \
       -p "$prompt" 2>&1 || true
@@ -120,7 +136,7 @@ run_test_any() {
 
   local green_output
   green_output=$(
-    $TIMEOUT_CMD claude --model haiku \
+    run_with_timeout 60 claude --model haiku \
       --print \
       --allowedTools "Read,Glob,Grep,Skill" \
       -p "$prompt" 2>&1 || true
