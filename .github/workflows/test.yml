@@ -30,8 +30,23 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Cache Claude Code
+        uses: actions/cache@v4
+        with:
+          path: ~/.local/share/claude
+          key: claude-code-${{ runner.os }}-${{ runner.arch }}
+
+      - name: Install Claude Code
+        run: |
+          if ! command -v claude &> /dev/null; then
+            curl -fsSL https://claude.ai/install.sh | bash
+          fi
+          echo "$HOME/.local/bin" >> $GITHUB_PATH
+
       - name: Make test scripts executable
         run: chmod +x ./skills/dotfiles-development/tests/*.sh
 
       - name: Run test suite
+        env:
+          CLAUDE_CODE_OAUTH_TOKEN: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
         run: ./skills/dotfiles-development/tests/run_tests.sh
