@@ -24,8 +24,11 @@ source "${SCRIPT_DIR}/helpers.sh"
 # The test prompt
 readonly TEST_PROMPT="How would I add a new tmux config to this dotfiles repo? Just give me the steps."
 
-# The pattern we expect to find in the skill's response
-readonly EXPECTED_PATTERN="fix-perms"
+# Multiple acceptable patterns (passes if ANY match)
+readonly EXPECTED_PATTERNS=(
+  "fix-perms"
+  "dotfiles-fix-perms"
+)
 
-# Run the test
-run_test "Add Config" "$TEST_PROMPT" "$EXPECTED_PATTERN"
+# Run the test with OR logic (passes if ANY pattern matches)
+run_test_any "Add Config" "$TEST_PROMPT" "${EXPECTED_PATTERNS[@]}"

@@ -6,6 +6,15 @@ IFS=$'\n\t'
 # Helper functions for dotfiles skill tests
 #######################################
 
+# Detect timeout command (GNU timeout on Linux, gtimeout on macOS with coreutils)
+if command -v timeout &>/dev/null; then
+  TIMEOUT_CMD="timeout 60"
+elif command -v gtimeout &>/dev/null; then
+  TIMEOUT_CMD="gtimeout 60"
+else
+  TIMEOUT_CMD=""  # No timeout available, run without
+fi
+
 # Color codes for output
 readonly COLOR_GREEN='\033[0;32m'
 readonly COLOR_RED='\033[0;31m'
@@ -66,7 +75,7 @@ run_test() {
 
   local green_output
   green_output=$(
-    claude --model haiku \
+    $TIMEOUT_CMD claude --model haiku \
       --print \
       --allowedTools "Read,Glob,Grep,Skill" \
       -p "$prompt" 2>&1 || true
@@ -86,6 +95,53 @@ run_test() {
     echo ""
     return 1
   fi
+}
+
+#######################################
+# Run a test with multiple acceptable patterns (OR logic)
+#
+# Args:
+#   $1 - test_name: Name of the test
+#   $2 - prompt: The prompt to send to Claude
+#   $3+ - patterns: One or more regex patterns (passes if ANY match)
+#
+# Returns:
+#   0 if any pattern matches, 1 if none match
+#######################################
+run_test_any() {
+  local test_name="$1"
+  local prompt="$2"
+  shift 2
+  local patterns=("$@")
+
+  section "Testing: $test_name"
+
+  info "Running GREEN phase (with skill access)..."
+
+  local green_output
+  green_output=$(
+    $TIMEOUT_CMD claude --model haiku \
+      --print \
+      --allowedTools "Read,Glob,Grep,Skill" \
+      -p "$prompt" 2>&1 || true
+  )
+
+  # Check if ANY expected pattern matches
+  for pattern in "${patterns[@]}"; do
+    if echo "$green_output" | grep -qE "$pattern"; then
+      pass "$test_name"
+      echo ""
+      return 0
+    fi
+  done
+
+  fail "$test_name"
+  echo "Expected one of: ${patterns[*]}"
+  echo ""
+  echo "GREEN output (first 30 lines):"
+  echo "$green_output" | head -30
+  echo ""
+  return 1
 }
 
 #######################################

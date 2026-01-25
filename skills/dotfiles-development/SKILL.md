@@ -70,11 +70,21 @@ Accessed via `~/.claudescripts` symlink (in PATH).
 
 ## Adding New Configurations
 
+| Step | Action | Script to Update |
+|------|--------|------------------|
+| 1 | Add file to repo root (no dot prefix) | — |
+| 2 | Add chmod line for permissions | **fix-perms** (`bin/dotfiles-fix-perms`) |
+| 3 | Add symlink if needed | **install** (`bin/dotfiles-install`) |
+
+**Detailed steps:**
+
 1. **Add file** to repo root (no dot prefix in name)
-2. **Add chmod** line to `bin/dotfiles-fix-perms`:
+2. **Update fix-perms** — Add chmod line to `bin/dotfiles-fix-perms`:
    - Scripts/dirs: `chmod 700`
    - Config files: `chmod 600`
-3. **Add symlink** (if needed) to `setup_symlinks()` in `bin/dotfiles-install`
+3. **Update install** (if needed) — Add symlink to `setup_symlinks()` in `bin/dotfiles-install`
+
+> **Common mistake:** Forgetting the fix-perms step. Every new file needs a chmod line.
 
 ## Permission Model
 
